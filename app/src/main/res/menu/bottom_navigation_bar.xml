@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:id="@+id/all"
+        android:title="@string/menu_title_all"
+        android:icon="@drawable/ic_library_books_black_24dp"/>
+
+    <item android:id="@+id/local"
+        android:title="@string/menu_title_local"
+        android:icon="@drawable/ic_local_library_black_24dp"/>
+
+    <item android:id="@+id/favorites"
+        android:title="@string/menu_title_favorite"
+        android:icon="@drawable/ic_favorite_black_24dp"/>
+
+    <item android:id="@+id/downloading"
+        android:title="@string/menu_title_downloads"
+        android:icon="@drawable/ic_file_download_black_24dp"/>
+
+</menu>

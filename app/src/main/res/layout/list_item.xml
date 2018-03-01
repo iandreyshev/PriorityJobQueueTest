@@ -18,12 +18,17 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:text="0" />
 
-    <ProgressBar
-        android:id="@+id/progressBar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
+    <TextView
+        android:id="@+id/progress"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:gravity="center_vertical|center_horizontal"
         android:indeterminate="false"
+        android:text="0"
+        android:textAlignment="center"
+        android:textAllCaps="false"
+        android:textSize="30sp"
+        android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/constraintLayout"
         app:layout_constraintStart_toEndOf="@+id/idView"
@@ -41,7 +46,17 @@
             android:id="@+id/loadButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="LOAD" />
+            android:text="LOAD"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <Button
+            android:id="@+id/clearButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="CLEAR"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/loadButton" />
 
         <ToggleButton
             android:id="@+id/favoriteButton"
@@ -50,15 +65,7 @@
             android:textOff="NOT FAV"
             android:textOn="FAV"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/loadButton" />
-
-        <Button
-            android:id="@+id/infoButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="INFO"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/favoriteButton" />
+            app:layout_constraintTop_toBottomOf="@+id/clearButton" />
 
         <Button
             android:id="@+id/deleteButton"
@@ -66,6 +73,6 @@
             android:layout_height="wrap_content"
             android:text="DEL"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/infoButton" />
+            app:layout_constraintTop_toBottomOf="@+id/favoriteButton" />
     </android.support.constraint.ConstraintLayout>
 </android.support.constraint.ConstraintLayout>

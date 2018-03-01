@@ -2,29 +2,46 @@ package com.loadingproto.ivanandreyshev.loadingprototype.presentation.presenter
 
 import com.arellomobile.mvp.InjectViewState
 import com.arellomobile.mvp.MvpPresenter
-import com.loadingproto.ivanandreyshev.loadingprototype.presentation.view.ListView
+import com.loadingproto.ivanandreyshev.loadingprototype.app.App
+import com.loadingproto.ivanandreyshev.loadingprototype.data.ContentItem
+import com.loadingproto.ivanandreyshev.loadingprototype.presentation.view.IListView
 
 @InjectViewState
-class ListPresenter : MvpPresenter<ListView>() {
+class ListPresenter : MvpPresenter<IListView>() {
 
     companion object {
         private const val MAX_COUNT: Int = 20
     }
 
-    private var mCount: Int = 0
-    private var mLast: Long = 0
-
-    fun onAdd() {
-        if (mCount == MAX_COUNT) {
-            return
+    override fun onFirstViewAttach() {
+        App.databaseHelper.contentItem.forEach {
+            viewState.insertItem(it.id)
         }
-
-        viewState.insertItem(mLast)
-        mLast++
-        mCount++
     }
 
-    fun onRemove(id: Long) {
+    fun onAdd() {
+        val newItem = ContentItem()
+        App.databaseHelper.contentItem.create(newItem)
+        viewState.insertItem(newItem.id)
+    }
+
+    fun onRemove(id: Int) {
         viewState.removeItem(id)
+    }
+
+    fun showAll() {
+
+    }
+
+    fun showLocal() {
+
+    }
+
+    fun showFavorites() {
+
+    }
+
+    fun showDownloading() {
+
     }
 }

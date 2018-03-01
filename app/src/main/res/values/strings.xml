@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">LoadingPrototype</string>
+
+    <string name="menu_title_create">Create</string>
+    <string name="menu_title_all">All</string>
+    <string name="menu_title_local">Local</string>
+    <string name="menu_title_favorite">Favorites</string>
+    <string name="menu_title_downloads">Downloads</string>
 </resources>

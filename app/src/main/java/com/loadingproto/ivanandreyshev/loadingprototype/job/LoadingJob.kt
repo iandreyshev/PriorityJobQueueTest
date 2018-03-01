@@ -1,27 +1,43 @@
 package com.loadingproto.ivanandreyshev.loadingprototype.job
 
-import com.firebase.jobdispatcher.JobParameters
-import com.firebase.jobdispatcher.JobService
-import org.jetbrains.anko.doAsync
+import com.birbit.android.jobqueue.Job
+import com.birbit.android.jobqueue.Params
+import com.birbit.android.jobqueue.RetryConstraint
+import com.loadingproto.ivanandreyshev.loadingprototype.event.UpdateLoadingProgressEvent
+import org.greenrobot.eventbus.EventBus
+import java.util.*
 
-class LoadingJob : JobService() {
+class LoadingJob(private val mId: Int) : Job(Params(0)) {
+
     companion object {
-        const val ID_KEY = "ID"
+        private const val TIME_TO_STEP = 200
     }
 
-    override fun onStopJob(job: JobParameters?): Boolean {
-        doAsync {
-            load(job?.extras?.getLong(ID_KEY) ?: return@doAsync)
+    override fun onRun() {
+        var lastTime = Calendar.getInstance().timeInMillis
+        var progress = 0
+
+        while (true) {
+            if (Calendar.getInstance().timeInMillis - lastTime > TIME_TO_STEP) {
+                lastTime = Calendar.getInstance().timeInMillis
+                progress++
+                EventBus.getDefault().post(UpdateLoadingProgressEvent(mId, progress))
+
+                if (progress >= 100) {
+                    return
+                }
+            }
         }
-
-        return false
     }
 
-    override fun onStartJob(job: JobParameters?): Boolean {
-        return false
+    override fun shouldReRunOnThrowable(throwable: Throwable, runCount: Int, maxRunCount: Int): RetryConstraint {
+        return RetryConstraint.CANCEL
     }
 
-    private fun load(id: Long) {
+    override fun onAdded() {
 
+    }
+
+    override fun onCancel(cancelReason: Int, throwable: Throwable?) {
     }
 }
