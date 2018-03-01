@@ -7,9 +7,10 @@
 
     <TextView
         android:id="@+id/idView"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="5dp"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_marginStart="10dp"
+        android:gravity="center_vertical"
         android:textAlignment="center"
         android:textSize="30sp"
         android:textStyle="bold"
@@ -29,6 +30,7 @@
         android:textAllCaps="false"
         android:textSize="30sp"
         android:textStyle="bold"
+        android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/constraintLayout"
         app:layout_constraintStart_toEndOf="@+id/idView"
@@ -51,28 +53,11 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <Button
-            android:id="@+id/clearButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="CLEAR"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/loadButton" />
-
-        <ToggleButton
-            android:id="@+id/favoriteButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textOff="NOT FAV"
-            android:textOn="FAV"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/clearButton" />
-
-        <Button
             android:id="@+id/deleteButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="DEL"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/favoriteButton" />
+            app:layout_constraintTop_toBottomOf="@+id/loadButton" />
     </android.support.constraint.ConstraintLayout>
 </android.support.constraint.ConstraintLayout>

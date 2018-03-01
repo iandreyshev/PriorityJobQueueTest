@@ -1,44 +1,52 @@
 package com.loadingproto.ivanandreyshev.loadingprototype.ui.adapter
 
-import android.support.v7.widget.RecyclerView
-import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
-import com.arellomobile.mvp.MvpDelegate
-import com.loadingproto.ivanandreyshev.loadingprototype.R
+import android.widget.BaseAdapter
+import android.content.Context
+import com.birbit.android.jobqueue.CancelResult
+import com.birbit.android.jobqueue.TagConstraint
+import com.loadingproto.ivanandreyshev.loadingprototype.app.App
+import com.loadingproto.ivanandreyshev.loadingprototype.data.ContentItem
+import com.loadingproto.ivanandreyshev.loadingprototype.job.LoadingJob
 
-class ListAdapter(private val mParentDelegate: MvpDelegate<*>) : RecyclerView.Adapter<ListViewHolder>() {
+class ListAdapter(private val mContext: Context) : BaseAdapter() {
 
     var onLoadListener: (Int) -> Unit = {}
-    var onClearListener: (Int) -> Unit = {}
-    var onFavoriteListener: (Int) -> Unit = {}
-    var onDeleteListener: (Int) -> Unit = {}
 
-    private val mList = ArrayList<Int>()
+    private val mList = ArrayList<ContentItem>()
 
-    fun insertItem(id: Int) {
-        mList.add(id)
+    fun insertItem(item: ContentItem) {
+        mList.add(item)
         notifyDataSetChanged()
     }
 
     fun removeItem(id: Int) {
-        mList.remove(id)
+        mList.removeAt(mList.indexOfFirst { id == it.id })
         notifyDataSetChanged()
     }
 
-    override fun onBindViewHolder(holder: ListViewHolder, position: Int) {
-        holder.onLoadListener = onLoadListener
-        holder.onClearListener = onClearListener
-        holder.onFavoriteListener = onFavoriteListener
-        holder.onDeleteListener = onDeleteListener
-        holder.bind(mList[position])
+    override fun getView(position: Int, view: View?, parent: ViewGroup?): View {
+        val resultView = view ?: ListItemView(mContext)
+        (resultView as ListItemView).bind(mList[position])
+
+        resultView.onLoadListener = { id ->
+            val tag = id.toString()
+            App.jobManager.cancelJobsInBackground(CancelResult.AsyncCancelCallback {}, TagConstraint.ALL, tag)
+            App.jobManager.addJobInBackground(LoadingJob(getItem(id), tag))
+        }
+        resultView.onDeleteListener = { id ->
+            App.databaseHelper.contentItem.delete(getItem(id))
+            mList.remove(getItem(id))
+            notifyDataSetChanged()
+        }
+
+        return resultView
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ListViewHolder {
-        val inflater = LayoutInflater.from(parent.context)
-        val view = inflater.inflate(R.layout.list_item, parent, false)
+    override fun getItem(position: Int): ContentItem = mList[position]
 
-        return ListViewHolder(mParentDelegate, view)
-    }
+    override fun getItemId(position: Int): Long = mList[position].id.toLong()
 
-    override fun getItemCount(): Int = mList.size
+    override fun getCount(): Int = mList.size
 }

@@ -9,6 +9,8 @@ data class ContentItem(
         var id: Int = 0,
         @DatabaseField(columnName = "load_state")
         var loadState: LoadState = LoadState.NOT_LOAD,
+        @DatabaseField(columnName = "load_progress")
+        var loadProgress: Int = 0,
         @DatabaseField(columnName = "isFavorite")
         val isFavorite: Boolean = false
 )

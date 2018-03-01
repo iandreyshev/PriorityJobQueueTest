@@ -15,14 +15,14 @@ class ListPresenter : MvpPresenter<IListView>() {
 
     override fun onFirstViewAttach() {
         App.databaseHelper.contentItem.forEach {
-            viewState.insertItem(it.id)
+            viewState.insertItem(it)
         }
     }
 
     fun onAdd() {
         val newItem = ContentItem()
         App.databaseHelper.contentItem.create(newItem)
-        viewState.insertItem(newItem.id)
+        viewState.insertItem(newItem)
     }
 
     fun onRemove(id: Int) {

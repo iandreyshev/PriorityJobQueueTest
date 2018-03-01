@@ -6,5 +6,11 @@ import com.arellomobile.mvp.viewstate.strategy.StateStrategyType
 
 interface IItemView : MvpView {
     @StateStrategyType(AddToEndSingleStrategy::class)
-    fun update(value: Int)
+    fun onAttach()
+
+    @StateStrategyType(AddToEndSingleStrategy::class)
+    fun updateProgress(value: Int)
+
+    @StateStrategyType(AddToEndSingleStrategy::class)
+    fun enableProgress(isEnable: Boolean)
 }

@@ -4,7 +4,7 @@ import android.support.v7.widget.RecyclerView
 import android.view.View
 import com.arellomobile.mvp.MvpDelegate
 
-abstract class MvpViewHolder<T>(
+abstract class MvpViewHolder<in T>(
         private var mParentDelegate: MvpDelegate<*>,
         view: View) : RecyclerView.ViewHolder(view) {
 
@@ -45,6 +45,7 @@ abstract class MvpViewHolder<T>(
         if (getMvpDelegate() != null) {
             getMvpDelegate()?.onCreate()
             getMvpDelegate()?.onAttach()
+            getMvpDelegate()?.onDestroyView()
         }
     }
 
