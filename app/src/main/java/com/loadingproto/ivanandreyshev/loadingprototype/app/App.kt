@@ -16,7 +16,7 @@ class App : Application() {
         super.onCreate()
         databaseHelper = OpenHelperManager.getHelper(this, DatabaseHelper::class.java)
         jobManager = JobManager(Configuration.Builder(this)
-                .minConsumerCount(1)
+                .minConsumerCount(2)
                 .maxConsumerCount(3)
                 .build())
     }

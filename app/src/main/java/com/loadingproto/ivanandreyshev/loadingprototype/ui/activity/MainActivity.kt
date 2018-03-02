@@ -4,9 +4,10 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import com.arellomobile.mvp.MvpAppCompatActivity
-
 import com.arellomobile.mvp.presenter.InjectPresenter
+
 import com.loadingproto.ivanandreyshev.loadingprototype.R
+import com.loadingproto.ivanandreyshev.loadingprototype.app.App
 import com.loadingproto.ivanandreyshev.loadingprototype.data.ContentItem
 import com.loadingproto.ivanandreyshev.loadingprototype.presentation.presenter.ListPresenter
 import com.loadingproto.ivanandreyshev.loadingprototype.presentation.view.IListView
@@ -14,6 +15,7 @@ import com.loadingproto.ivanandreyshev.loadingprototype.ui.adapter.ListAdapter
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : MvpAppCompatActivity(), IListView {
+
     @InjectPresenter
     lateinit var mPresenter: ListPresenter
 
@@ -23,8 +25,8 @@ class MainActivity : MvpAppCompatActivity(), IListView {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        mListAdapter = ListAdapter(this)
-        mListAdapter.onLoadListener
+        mListAdapter = ListAdapter(this, { mPresenter.onLoadingButtonClick(it) })
+        mListAdapter.updateItems(App.databaseHelper.contentItem.asIterable())
 
         itemsListView.adapter = mListAdapter
     }
@@ -34,19 +36,16 @@ class MainActivity : MvpAppCompatActivity(), IListView {
         return true
     }
 
+    override fun toast(message: String) {
+        toast(message)
+    }
+
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         if (item?.itemId == R.id.option_create) {
-            mPresenter.onAdd()
+            App.databaseHelper.contentItem.create(ContentItem())
+            mListAdapter.updateItems(App.databaseHelper.contentItem.asIterable())
         }
 
         return super.onOptionsItemSelected(item)
-    }
-
-    override fun insertItem(item: ContentItem) {
-        mListAdapter.insertItem(item)
-    }
-
-    override fun removeItem(id: Int) {
-        mListAdapter.removeItem(id)
     }
 }

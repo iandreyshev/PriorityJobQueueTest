@@ -4,25 +4,29 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.content.Context
-import com.birbit.android.jobqueue.CancelResult
+import android.util.Log
 import com.birbit.android.jobqueue.TagConstraint
 import com.loadingproto.ivanandreyshev.loadingprototype.app.App
 import com.loadingproto.ivanandreyshev.loadingprototype.data.ContentItem
-import com.loadingproto.ivanandreyshev.loadingprototype.job.LoadingJob
+import com.loadingproto.ivanandreyshev.loadingprototype.event.UpdateItemEvent
+import org.greenrobot.eventbus.EventBus
+import org.greenrobot.eventbus.Subscribe
+import org.greenrobot.eventbus.ThreadMode
 
-class ListAdapter(private val mContext: Context) : BaseAdapter() {
+class ListAdapter(
+        private val mContext: Context,
+        private val onLoadListener: (ContentItem) -> Unit
+) : BaseAdapter() {
 
-    var onLoadListener: (Int) -> Unit = {}
+    private var mList = ArrayList<ContentItem>()
 
-    private val mList = ArrayList<ContentItem>()
-
-    fun insertItem(item: ContentItem) {
-        mList.add(item)
-        notifyDataSetChanged()
+    init {
+        EventBus.getDefault().register(this)
     }
 
-    fun removeItem(id: Int) {
-        mList.removeAt(mList.indexOfFirst { id == it.id })
+    fun updateItems(items: Iterable<ContentItem>) {
+        mList = ArrayList()
+        mList.addAll(items)
         notifyDataSetChanged()
     }
 
@@ -30,23 +34,42 @@ class ListAdapter(private val mContext: Context) : BaseAdapter() {
         val resultView = view ?: ListItemView(mContext)
         (resultView as ListItemView).bind(mList[position])
 
-        resultView.onLoadListener = { id ->
-            val tag = id.toString()
-            App.jobManager.cancelJobsInBackground(CancelResult.AsyncCancelCallback {}, TagConstraint.ALL, tag)
-            App.jobManager.addJobInBackground(LoadingJob(getItem(id), tag))
-        }
-        resultView.onDeleteListener = { id ->
-            App.databaseHelper.contentItem.delete(getItem(id))
-            mList.remove(getItem(id))
+        resultView.onLoadListener = { onLoadListener(it) }
+        resultView.onDeleteListener = { item ->
+            App.jobManager.cancelJobsInBackground(null, TagConstraint.ALL, item.id.toString())
+            App.databaseHelper.contentItem.delete(item)
+            mList.remove(getItem(item.id))
             notifyDataSetChanged()
         }
 
         return resultView
     }
 
-    override fun getItem(position: Int): ContentItem = mList[position]
+    override fun getItem(id: Int): ContentItem {
+        val item = mList.find {
+            it.id == id
+        }
+
+        return if (item == null) {
+            Log.e(javaClass.name, "Item not found")
+            ContentItem()
+        } else {
+            item
+        }
+    }
 
     override fun getItemId(position: Int): Long = mList[position].id.toLong()
 
     override fun getCount(): Int = mList.size
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    fun updateItem(event: UpdateItemEvent) {
+        mList.forEachIndexed { index, contentItem ->
+            if (contentItem.id == event.item.id) {
+                mList[index] = event.item
+                notifyDataSetChanged()
+                return@forEachIndexed
+            }
+        }
+    }
 }

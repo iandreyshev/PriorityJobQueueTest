@@ -2,46 +2,48 @@ package com.loadingproto.ivanandreyshev.loadingprototype.presentation.presenter
 
 import com.arellomobile.mvp.InjectViewState
 import com.arellomobile.mvp.MvpPresenter
+import com.birbit.android.jobqueue.TagConstraint
 import com.loadingproto.ivanandreyshev.loadingprototype.app.App
 import com.loadingproto.ivanandreyshev.loadingprototype.data.ContentItem
+import com.loadingproto.ivanandreyshev.loadingprototype.data.OfflineState
+import com.loadingproto.ivanandreyshev.loadingprototype.event.UpdateItemEvent
+import com.loadingproto.ivanandreyshev.loadingprototype.job.LoadingUseCase
 import com.loadingproto.ivanandreyshev.loadingprototype.presentation.view.IListView
+import org.greenrobot.eventbus.EventBus
 
 @InjectViewState
 class ListPresenter : MvpPresenter<IListView>() {
-
-    companion object {
-        private const val MAX_COUNT: Int = 20
-    }
-
-    override fun onFirstViewAttach() {
-        App.databaseHelper.contentItem.forEach {
-            viewState.insertItem(it)
+    fun onLoadingButtonClick(item: ContentItem) {
+        when (item.loadState) {
+            OfflineState.NOT_LOAD -> onDownloadItem(item)
+            OfflineState.WAIT_LOAD -> onStopDownloading(item)
+            OfflineState.IN_PROCESS -> onStopDownloading(item)
+            OfflineState.NOT_AVAILABLE -> onTryToDownloadInvalidItem(item)
+            OfflineState.READY -> onDeleteItemData(item)
         }
     }
 
-    fun onAdd() {
-        val newItem = ContentItem()
-        App.databaseHelper.contentItem.create(newItem)
-        viewState.insertItem(newItem)
+    private fun onDownloadItem(item: ContentItem) {
+        onStopDownloading(item)
+        App.jobManager.addJobInBackground(LoadingUseCase(item.downloadJobTag, item))
     }
 
-    fun onRemove(id: Int) {
-        viewState.removeItem(id)
+    private fun onStopDownloading(item: ContentItem) {
+        item.loadState = OfflineState.NOT_LOAD
+        App.jobManager.cancelJobsInBackground(null, TagConstraint.ALL, item.downloadJobTag)
+        EventBus.getDefault().post(UpdateItemEvent(item))
     }
 
-    fun showAll() {
-
+    private fun onTryToDownloadInvalidItem(item: ContentItem) {
+        viewState.toast("NOT AVAILABLE")
     }
 
-    fun showLocal() {
-
+    private fun onDeleteItemData(item: ContentItem) {
+        item.loadState = OfflineState.NOT_LOAD
+        App.databaseHelper.contentItem.update(item)
+        EventBus.getDefault().post(UpdateItemEvent(item))
     }
 
-    fun showFavorites() {
-
-    }
-
-    fun showDownloading() {
-
-    }
+    private val ContentItem.downloadJobTag: String
+        get() = "Download $id"
 }
