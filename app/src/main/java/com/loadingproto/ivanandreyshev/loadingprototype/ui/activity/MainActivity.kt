@@ -1,64 +1,59 @@
 package com.loadingproto.ivanandreyshev.loadingprototype.ui.activity
 
 import android.os.Bundle
-import android.support.v7.widget.DividerItemDecoration
-import android.support.v7.widget.LinearLayoutManager
-import android.view.Menu
-import android.view.MenuItem
 import com.arellomobile.mvp.MvpAppCompatActivity
-
 import com.arellomobile.mvp.presenter.InjectPresenter
+
 import com.loadingproto.ivanandreyshev.loadingprototype.R
-import com.loadingproto.ivanandreyshev.loadingprototype.presentation.presenter.ListPresenter
-import com.loadingproto.ivanandreyshev.loadingprototype.presentation.view.IListView
-import com.loadingproto.ivanandreyshev.loadingprototype.ui.adapter.ListAdapter
+import com.loadingproto.ivanandreyshev.loadingprototype.App
+import com.loadingproto.ivanandreyshev.loadingprototype.DownloadPresenter
+import com.loadingproto.ivanandreyshev.loadingprototype.data.ContentItem
+import com.loadingproto.ivanandreyshev.loadingprototype.data.LoadState
+import com.loadingproto.ivanandreyshev.loadingprototype.event.UpdateItemEvent
+import com.loadingproto.ivanandreyshev.loadingprototype.event.UpdateLoadingProgressEvent
+import com.loadingproto.ivanandreyshev.loadingprototype.ui.view.IMainView
 import kotlinx.android.synthetic.main.activity_main.*
+import org.greenrobot.eventbus.EventBus
+import org.greenrobot.eventbus.Subscribe
+import org.greenrobot.eventbus.ThreadMode
+import org.jetbrains.anko.toast
 
-class MainActivity : MvpAppCompatActivity(), IListView {
+class MainActivity : MvpAppCompatActivity(), IMainView {
+
     @InjectPresenter
-    lateinit var mPresenter: ListPresenter
-
-    private val mListAdapter = ListAdapter(mvpDelegate)
+    lateinit var mPresenter: DownloadPresenter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        mListAdapter.onLoadListener
+        EventBus.getDefault().register(this)
 
-        navigation.setOnNavigationItemSelectedListener { item ->
-            when (item.itemId) {
-                R.id.all -> mPresenter.showAll()
-                R.id.local -> mPresenter.showLocal()
-                R.id.favorites -> mPresenter.showFavorites()
-                R.id.downloading -> mPresenter.showDownloading()
-            }
-            return@setOnNavigationItemSelectedListener true
+        if (App.databaseHelper.contentItem.count() == 0) {
+            App.databaseHelper.contentItem.create(ContentItem(url = ""))
         }
 
-        itemsListView.adapter = mListAdapter
-        itemsListView.layoutManager = LinearLayoutManager(this)
-        itemsListView.addItemDecoration(DividerItemDecoration(this, LinearLayoutManager.VERTICAL))
-    }
+        val item = App.databaseHelper.contentItem.first()
+        stateView.text = item.loadState.name
+        progressView.text = if (item.loadState == LoadState.IN_PROGRESS) item.loadProgress.toString() else ""
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.toolbar_menu, menu)
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        if (item?.itemId == R.id.option_create) {
-            mPresenter.onAdd()
+        button.setOnClickListener {
+            mPresenter.onClick(App.databaseHelper.contentItem.first())
         }
-
-        return super.onOptionsItemSelected(item)
     }
 
-    override fun insertItem(id: Int) {
-        mListAdapter.insertItem(id)
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    fun updateProgress(event: UpdateLoadingProgressEvent) {
+        progressView.text = event.progress
     }
 
-    override fun removeItem(id: Int) {
-        mListAdapter.removeItem(id)
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    fun updateItem(event: UpdateItemEvent) {
+        App.databaseHelper.contentItem.update(event.item)
+        stateView.text = App.databaseHelper.contentItem.first().loadState.name
+    }
+
+    override fun toast(message: String) {
+        toast(message.subSequence(0 until message.length))
     }
 }
