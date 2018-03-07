@@ -1,4 +1,4 @@
-package com.loadingproto.ivanandreyshev.loadingprototype.fileManager
+package com.loadingproto.ivanandreyshev.loadingprototype.fileManager.extension
 
 import java.io.File
 
